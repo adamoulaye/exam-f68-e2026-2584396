@@ -25,3 +25,24 @@ async def test_predict_unprocessable_entity():
             "feature3": 4.9
         })
     assert resp.status_code == 422
+
+@pytest.mark.anyio
+async def test_predict_features_vide():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        resp = await client.post("/predict", json={
+            "features": []
+        })
+    assert resp.status_code == 200
+    assert {"predictions": []} == resp.json()
+
+
+@pytest.mark.anyio
+async def test_predict_features_negatif():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        resp = await client.post("/predict", json={
+            "features": [-2.0, -4.5, -10.0]
+        })
+    assert resp.status_code == 200
+    assert {"predictions": [-4.0, -9.0, -20.0]} == resp.json()
